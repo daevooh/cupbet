@@ -1,0 +1,246 @@
+{% extends 'base.html' %}
+
+{% block title %}Claim Payout - IWEHA Cup{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-gray-800 mb-2">Claim Your Payout</h1>
+        <p class="text-gray-600">Enter your bet code and bank details to receive your winnings</p>
+    </div>
+
+    <!-- Success Message -->
+    {% if success_message %}
+    <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-green-700">{{ success_message }}</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Error Message -->
+    {% if error_message %}
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+        <div class="flex">
+            <div class="flex-shrink-0">
+                <svg class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                </svg>
+            </div>
+            <div class="ml-3">
+                <p class="text-sm text-red-700">{{ error_message }}</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Claim Form -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <form method="POST" class="space-y-6">
+            {% csrf_token %}
+            
+            <!-- Bet Code -->
+            <div>
+                <label for="bet_code" class="block text-sm font-medium text-gray-700 mb-2">Bet Code</label>
+                <input type="text" id="bet_code" name="bet_code" 
+                       placeholder="e.g., BET-1234A" 
+                       value="{{ bet_code_value|default:'' }}"
+                       class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg font-mono">
+                <p class="mt-1 text-sm text-gray-500">Enter the bet code from your winning bet</p>
+            </div>
+
+            <!-- Bank Details -->
+            <div class="border-t pt-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Bank Account Details</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="bank_code" class="block text-sm font-medium text-gray-700 mb-2">Bank</label>
+                        <select id="bank_code" name="bank_code" required 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="">Loading banks .......</option>
+
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label for="account_number" class="block text-sm font-medium text-gray-700 mb-2">Account Number</label>
+                        <input type="text" id="account_number" name="account_number" 
+                               placeholder="10-digit account number" 
+                               value="{{ request.POST.account_number|default:'' }}"
+                               maxlength="10" pattern="[0-9]{10}"
+                               class="w-full px-4 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-lg font-mono">
+                    </div>
+                    <div>
+                        <label for="account_name" class="block text-sm font-medium text-gray-700 mb-2">Account Name</label>
+                        <input type="text" id="account_name" name="account_name"
+                               readonly
+                               class="w-full px-4 py-3 bg-gray-100 border border-gray-300 rounded-md focus:outline-none text-lg font-mono">
+                    </div>
+                    
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="border-t pt-6">
+                <button type="submit" 
+                        class="w-full bg-green-600 text-white py-3 px-4 rounded-md hover:bg-green-700 transition duration-200 font-medium">
+                    Claim Payout
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bet Details Preview -->
+    {% if bet %}
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+        <div class="bg-gradient-to-r from-green-600 to-blue-600 px-6 py-4">
+            <h3 class="text-xl font-bold text-white">Bet Details</h3>
+        </div>
+        <div class="p-6">
+            <div class="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-500">Bet Code</label>
+                    <p class="text-lg font-semibold text-gray-900">{{ bet.bet_code }}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-500">Payout Amount</label>
+                    <p class="text-2xl font-bold text-green-600">₦{{ bet.payout|floatformat:2 }}</p>
+                </div>
+            </div>
+            <div class="bg-green-50 rounded-lg p-4">
+                <div class="flex items-center">
+                    <svg class="h-5 w-5 text-green-500 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                    </svg>
+                    <span class="text-green-700 font-medium">This is a winning bet eligible for payout</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Information Section -->
+    <div class="bg-blue-50 rounded-lg p-6">
+        <h3 class="text-lg font-semibold text-blue-800 mb-3">Important Information</h3>
+        <ul class="text-blue-700 text-sm space-y-2">
+            <li class="flex items-start">
+                <svg class="h-4 w-4 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                Only winning bets are eligible for payout
+            </li>
+            <li class="flex items-start">
+                <svg class="h-4 w-4 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                Payouts are processed within 24-48 hours
+            </li>
+            <li class="flex items-start">
+                <svg class="h-4 w-4 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                Ensure your account number is correct to avoid delays
+            </li>
+            <li class="flex items-start">
+                <svg class="h-4 w-4 text-blue-500 mr-2 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd" />
+                </svg>
+                Each bet code can only be used once for payout
+            </li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Auto-format account number to ensure it's 10 digits
+document.getElementById('account_number').addEventListener('input', function(e) {
+    let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+    if (value.length > 10) {
+        value = value.substring(0, 10); // Limit to 10 digits
+    }
+    e.target.value = value;
+});
+
+// Validate form before submission
+document.querySelector('form').addEventListener('submit', function(e) {
+    const betCode = document.getElementById('bet_code').value.trim();
+    const bankCode = document.getElementById('bank_code').value;
+    const accountNumber = document.getElementById('account_number').value;
+    
+    if (!betCode) {
+        alert('Please enter your bet code');
+        e.preventDefault();
+        return;
+    }
+    
+    // if (!bankCode) {
+    //     alert('Please select your bank');
+    //     e.preventDefault();
+    //     return;
+    // }
+    
+    if (accountNumber.length !== 10) {
+        alert('Please enter a valid 10-digit account number');
+        e.preventDefault();
+        return;
+    }
+});
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/bank/')
+        .then(res => res.json())
+        .then(data => {
+            const banks = Array.isArray(data) ? data : data.banks;
+            if (!Array.isArray(banks)) throw new Error("Bank list not found in API response");
+            const select = document.getElementById('bank_code');
+            select.innerHTML = '<option value="">Select your bank</option>';
+            banks.forEach(bank => {
+                const option = document.createElement('option');
+                option.value = bank.code;
+                option.text = bank.name;
+                select.appendChild(option);
+            });
+        })
+        .catch(error => {
+            console.error('Error loading banks:', error);
+            alert('Could not load bank list. Try again.');
+        });
+});
+ // Auto-resolve account name when bank or account number changes
+const resolveAccountName = () => {
+        const accountNumber = document.getElementById('account_number').value;
+        const bankCode = document.getElementById('bank_code').value;
+
+        if (accountNumber.length === 10 && bankCode) {
+            fetch(`/resolve-account/?account_number=${accountNumber}&bank_code=${bankCode}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById('account_name').value = data.account_name;
+                    } else {
+                        document.getElementById('account_name').value = '';
+                        console.warn(data.message || 'Could not resolve account name');
+                    }
+                })
+                .catch(err => {
+                    document.getElementById('account_name').value = '';
+                    console.error("Error resolving account name:", err);
+                });
+        }
+    };
+
+    document.getElementById('account_number').addEventListener('blur', resolveAccountName);
+    document.getElementById('bank_code').addEventListener('change', resolveAccountName);
+
+</script>
+{% endblock %}
