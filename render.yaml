@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: cupbet
+    env: python
+    plan: free
+    buildCommand: |
+      pip install -r requirements.txt
+      python manage.py migrate
+      python manage.py createadmin
+    startCommand: gunicorn cupbet.wsgi:application
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: cupbet.settings
+      - key: SECRET_KEY
+      - key: DEBUG
+        value: 'False'
+      - key: DATABASE_URL
+      - key: ADMIN_USERNAME
+      - key: ADMIN_EMAIL
+      - key: ADMIN_PASSWORD
