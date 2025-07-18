@@ -1,20 +1,35 @@
+# Render Blueprint YAML for cupbet/24bet
+version: "1"
 services:
   - type: web
     name: cupbet
-    env: python
+    runtime: python
+    repo: https://github.com/daevooh/cupbet
     plan: free
+    region: oregon
     buildCommand: |
       pip install -r requirements.txt
       python manage.py migrate
+      python manage.py collectstatic --noinput
       python manage.py createadmin
     startCommand: gunicorn cupbet.wsgi:application
+    autoDeployTrigger: commit
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: cupbet.settings
       - key: SECRET_KEY
+        sync: false
       - key: DEBUG
-        value: 'False'
+        sync: false
       - key: DATABASE_URL
+        sync: false
       - key: ADMIN_USERNAME
+        sync: false
       - key: ADMIN_EMAIL
+        sync: false
       - key: ADMIN_PASSWORD
+        sync: false
+      - key: ALLOWED_HOSTS
+        sync: false
+      - key: PAYSTACK_SECRET_KEY
+        sync: false
