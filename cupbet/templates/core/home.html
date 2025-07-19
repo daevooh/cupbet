@@ -1,29 +1,14 @@
 {% extends 'base.html' %}
-
+{% load static %}
 {% block title %}IWEHA Cup - Home{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<div class="text-center mb-12">
-    <h1 class="text-4xl md:text-6xl font-bold text-gray-800 mb-4">🏆 IWEHA Cup</h1>
-    <p class="text-xl text-gray-600 mb-6">Grassroots Football Tournament Betting</p>
-    <div class="flex justify-center space-x-8 text-center">
-        <div class="bg-white p-4 rounded-lg shadow-md">
-            <div class="text-2xl font-bold text-blue-600">{{ total_teams }}</div>
-            <div class="text-gray-600">Teams</div>
-        </div>
-        <div class="bg-white p-4 rounded-lg shadow-md">
-            <div class="text-2xl font-bold text-green-600">{{ total_matches }}</div>
-            <div class="text-gray-600">Matches</div>
-        </div>
-    </div>
-</div>
 
 <!-- Tournament Info -->
 <div class="bg-white rounded-lg shadow-md p-6 mb-8">
-    <h2 class="text-2xl font-bold text-gray-800 mb-4">About IWEHA Cup</h2>
+    <h2 class="text-2xl font-bold text-gray-800 mb-4">About Bet.24Athletics</h2>
     <p class="text-gray-600 mb-4">
-        Welcome to the IWEHA Cup betting platform! Place bets on your favorite teams and win big with our peer-pool system. 
+        Welcome to the  Bet.24Athletics betting platform! Place bets on your favorite teams and win big with our peer-pool system. 
         Winners split the total amount lost by others, making every bet exciting!
     </p>
     <div class="grid md:grid-cols-3 gap-4 text-sm">
@@ -46,11 +31,22 @@
         <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for match in upcoming_matches %}
             <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                <div class="p-6">
-                    <div class="text-center mb-4">
-                        <div class="text-sm text-gray-500">{{ match.start_time|date:"M d, Y - H:i" }}</div>
-                    </div>
-                    
+                <!-- Match Header (clickable) -->
+                <button type="button"
+                    class="w-full text-left p-4 focus:outline-none flex items-center justify-between"
+                    onclick="toggleMatchDetails({{ match.id }})">
+                    <span>
+                        <span class="font-bold">{{ match.team_a.name }}</span>
+                        <span class="mx-2 text-gray-400">vs</span>
+                        <span class="font-bold">{{ match.team_b.name }}</span>
+                        <span class="ml-4 text-sm text-gray-500">{{ match.start_time|date:'M d, Y - H:i' }}</span>
+                    </span>
+                    <svg id="chevron-{{ match.id }}" class="w-5 h-5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>
+                    </svg>
+                </button>
+                <!-- Collapsible Content -->
+                <div id="match-details-{{ match.id }}" class="hidden p-6 border-t bg-gray-50">
                     <div class="flex items-center justify-between mb-6">
                         <div class="text-center flex-1">
                             <div class="font-bold text-lg">{{ match.team_a.name }}</div>
@@ -66,7 +62,6 @@
                             {% endif %}
                         </div>
                     </div>
-
                     <!-- Betting Form -->
                     <form class="space-y-4" onsubmit="placeBet(event, {{ match.id }})">
                         <div>
@@ -74,7 +69,6 @@
                             <input type="text" name="bettor_name" required 
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
-                        
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Your Email</label>
                             <input type="email" name="bettor_email" required 
@@ -82,13 +76,11 @@
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                             <p class="text-xs text-gray-500 mt-1">We'll send your bet code and payment receipt to this email</p>
                         </div>
-                        
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Bet Amount (₦)</label>
                             <input type="number" name="amount" min="100" step="100" required 
                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
                         </div>
-                        
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">Your Prediction</label>
                             <select name="bet_choice" required 
@@ -99,7 +91,6 @@
                                 <option value="D">Draw</option>
                             </select>
                         </div>
-                        
                         <button type="submit" 
                                 class="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition duration-200">
                             Place Bet
@@ -129,7 +120,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Match</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Result</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Pool</th>
+                        <!-- <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Pool</th> -->
                     </tr>
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
@@ -160,9 +151,9 @@
                                 </span>
                             {% endif %}
                         </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        <!-- <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                             ₦{{ match.total_pool|floatformat:0 }}
-                        </td>
+                        </td> -->
                     </tr>
                     {% endfor %}
                 </tbody>
@@ -175,6 +166,31 @@
 
 {% block extra_js %}
 <script>
+
+function toggleMatchDetails(matchId) {
+    // Close all other dropdowns
+    document.querySelectorAll('[id^="match-details-"]').forEach(function(el) {
+        if (el.id !== 'match-details-' + matchId) {
+            el.classList.add('hidden');
+        }
+    });
+    document.querySelectorAll('[id^="chevron-"]').forEach(function(svg) {
+        if (svg.id !== 'chevron-' + matchId) {
+            svg.classList.remove('rotate-180');
+        }
+    });
+    // Toggle the selected one
+    const details = document.getElementById('match-details-' + matchId);
+    const chevron = document.getElementById('chevron-' + matchId);
+    if (details.classList.contains('hidden')) {
+        details.classList.remove('hidden');
+        chevron.classList.add('rotate-180');
+    } else {
+        details.classList.add('hidden');
+        chevron.classList.remove('rotate-180');
+    }
+}
+
 function placeBet(event, matchId) {
     event.preventDefault();
     
@@ -206,7 +222,7 @@ function placeBet(event, matchId) {
     
     // Initialize Paystack
     const handler = PaystackPop.setup({
-        key:'pk_test_452b8203651f707d41924bc7c665eab9abb7f2da', //'pk_live_5cc414d2b8bc7ee68855b8aded022495b8eb2cb5', // Replace with your Paystack public key
+        key:'pk_live_5cc414d2b8bc7ee68855b8aded022495b8eb2cb5', 
         email: bettorEmail, // Use the user's email
         amount: amount * 100, // Paystack expects amount in kobo
         currency: 'NGN',
